@@ -1,5 +1,6 @@
 const http = require("http");
 const getUsers = require("./modules/users");
+const { error } = require("console");
 
 const ipAddress = "http://127.0.0.1";
 const port = 3003;
@@ -7,58 +8,59 @@ const port = 3003;
 const server = http.createServer((request, response) => {
   const url = new URL(request.url, ipAddress);
   const userName = url.searchParams.get("hello");
-  const isHello = url.searchParams.has("hello");
-  const isUsers = url.searchParams.has("users");
 
-  console.log(url.searchParams.keys());
-  console.log(url.searchParams.has("users"));
-
-  if (userName && isHello) {
+  if (userName) {
     response.status = 200;
     response.statusMessage = "Ok";
-    response.header = "Content-Type: text/plain";
+    response.setHeader("Content-Type", "text/plain");
     response.write(`Hello, ${userName}`);
     response.end();
 
     return;
   }
 
-  if (!userName && isHello) {
-    response.status = 400;
-    response.statusMessage = "Error";
-    response.header = "Content-Type: text/plain";
-    response.write(`Enter a name`);
-    response.end();
+  switch (request.url) {
+    case "/users":
+      response.status = 200;
+      response.statusMessage = "Ok";
+      response.setHeader("Content-Type", "application/json");
+      response.write(getUsers());
+      response.end();
+      break;
 
-    return;
+    case "/?hello":
+    case "/?hello=":
+      response.status = 400;
+      response.statusMessage = "Bad request";
+      response.setHeader("Content-Type", "text/plain");
+      response.write(`Enter a name`);
+      response.end();
+      break;
+
+    case "/":
+      response.status = 200;
+      response.statusMessage = "Ok";
+      response.setHeader("Content-Type", "text/plain");
+      response.write("Hello, world!");
+      response.end();
+      break;
+
+    case "/favicon.ico":
+      // авторматически срабатывает запрос за фавиконкой для отрисовки ее во вкладке
+      // обрабатываем этот запрос, иначе в консоль падает 500
+      response.status = 204;
+      response.write("No content");
+      response.end();
+      break;
+
+    default:
+      response.statusCode = 500;
+      response.statusMessage = "Internal Server Error";
+      response.setHeader("Content-Type", "text/plain");
+      response.write("Empty message");
+      response.end();
+      break;
   }
-
-  if (isUsers) {
-    response.status = 200;
-    response.statusMessage = "Ok";
-    response.header = "Content-Type: application/json";
-    response.write(getUsers());
-    response.end();
-
-    return;
-  }
-
-  if (!isUsers || !isHello) {
-    response.status = 500;
-    response.statusMessage = "Server error";
-    response.header = "Content-Type: text/plain";
-    //просто самопроверка
-    response.write("empty answer");
-    response.end();
-
-    return;
-  }
-
-  response.status = 200;
-  response.statusMessage = "Ok";
-  response.header = "Content-Type: text/plain";
-  response.write("Hello, world!");
-  response.end();
 });
 
 server.listen(port, () => {
