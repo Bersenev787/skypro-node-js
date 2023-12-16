@@ -10,7 +10,7 @@ const server = http.createServer((request, response) => {
   const userName = url.searchParams.get("hello");
 
   if (userName) {
-    response.status = 200;
+    response.statusCode = 200;
     response.statusMessage = "Ok";
     response.setHeader("Content-Type", "text/plain");
     response.write(`Hello, ${userName}`);
@@ -21,7 +21,7 @@ const server = http.createServer((request, response) => {
 
   switch (request.url) {
     case "/users":
-      response.status = 200;
+      response.statusCode = 200;
       response.statusMessage = "Ok";
       response.setHeader("Content-Type", "application/json");
       response.write(getUsers());
@@ -30,7 +30,7 @@ const server = http.createServer((request, response) => {
 
     case "/?hello":
     case "/?hello=":
-      response.status = 400;
+      response.statusCode = 400;
       response.statusMessage = "Bad request";
       response.setHeader("Content-Type", "text/plain");
       response.write(`Enter a name`);
@@ -38,7 +38,7 @@ const server = http.createServer((request, response) => {
       break;
 
     case "/":
-      response.status = 200;
+      response.statusCode = 200;
       response.statusMessage = "Ok";
       response.setHeader("Content-Type", "text/plain");
       response.write("Hello, world!");
@@ -48,7 +48,7 @@ const server = http.createServer((request, response) => {
     case "/favicon.ico":
       // авторматически срабатывает запрос за фавиконкой для отрисовки ее во вкладке
       // обрабатываем этот запрос, иначе в консоль падает 500
-      response.status = 204;
+      response.statusCode = 204;
       response.write("No content");
       response.end();
       break;
